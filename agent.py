@@ -7,18 +7,21 @@ from torch.optim.lr_scheduler import LambdaLR
 
 
 class Agent:
-    def __init__(self, env_name, n_iter, n_states, action_bounds, n_actions, lr):
+    def __init__(self, env_name, n_iter, n_states, action_bounds, n_actions, lr, n_latent):
         self.env_name = env_name
         self.n_iter = n_iter
         self.action_bounds = action_bounds
         self.n_actions = n_actions
         self.n_states = n_states
+        self.n_latent = n_latent
+        self.has_latent_code = bool(n_latent)
         self.device = torch.device("cpu")
         self.lr = lr
 
         self.current_policy = Actor(n_states=self.n_states,
-                                    n_actions=self.n_actions).to(self.device)
-        self.critic = Critic(n_states=self.n_states).to(self.device)
+                                    n_actions=self.n_actions,
+                                    n_latent=self.n_latent).to(self.device)
+        self.critic = Critic(n_states=self.n_states, n_latent=self.n_latent).to(self.device)
 
         self.actor_optimizer = Adam(self.current_policy.parameters(), lr=self.lr, eps=1e-5)
         self.critic_optimizer = Adam(self.critic.parameters(), lr=self.lr, eps=1e-5)

@@ -5,12 +5,13 @@ import torch
 
 class Actor(nn.Module):
 
-    def __init__(self, n_states, n_actions):
+    def __init__(self, n_states, n_actions, n_latent):
         super(Actor, self).__init__()
         self.n_states = n_states
         self.n_actions = n_actions
+        self.n_latent = n_latent
 
-        self.fc1 = nn.Linear(in_features=self.n_states, out_features=64)
+        self.fc1 = nn.Linear(in_features=self.n_states + self.n_latent, out_features=64)
         self.fc2 = nn.Linear(in_features=64, out_features=64)
         self.mu = nn.Linear(in_features=64, out_features=self.n_actions)
 
@@ -34,11 +35,12 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-    def __init__(self, n_states):
+    def __init__(self, n_states, n_latent):
         super(Critic, self).__init__()
         self.n_states = n_states
+        self.n_latent = n_latent
 
-        self.fc1 = nn.Linear(in_features=self.n_states, out_features=64)
+        self.fc1 = nn.Linear(in_features=self.n_states + self.n_latent, out_features=64)
         self.fc2 = nn.Linear(in_features=64, out_features=64)
         self.value = nn.Linear(in_features=64, out_features=1)
 

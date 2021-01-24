@@ -12,6 +12,7 @@ class Train:
         self.env_name = env_name
         self.test_env = test_env
         self.agent = agent
+        self.has_latent_code = agent.has_latent_code
         self.epsilon = epsilon
         self.horizon = horizon
         self.epochs = epochs
@@ -19,7 +20,7 @@ class Train:
         self.n_iterations = n_iterations
 
         self.start_time = 0
-        self.state_rms = RunningMeanStd(shape=(self.agent.n_states,))
+        self.state_rms = RunningMeanStd(shape=(self.agent.n_states + self.agent.n_latent,))
 
         self.running_reward = 0
 
@@ -68,6 +69,7 @@ class Train:
     def step(self):
         state = self.env.reset()
         for iteration in range(1, 1 + self.n_iterations):
+            print(f'{iteration}/{self.n_iterations}')
             states = []
             actions = []
             rewards = []
@@ -77,8 +79,12 @@ class Train:
 
             self.start_time = time.time()
             for t in range(self.horizon):
+                if self.has_latent_code:
+                    state = np.concatenate([state, self.env.latent_code])
+
                 # self.state_rms.update(state)
                 state = np.clip((state - self.state_rms.mean) / (self.state_rms.var ** 0.5 + 1e-8), -5, 5)
+
                 dist = self.agent.choose_dist(state)
                 action = dist.sample().cpu().numpy()[0]
                 # action = np.clip(action, self.agent.action_bounds[0], self.agent.action_bounds[1])
@@ -98,6 +104,8 @@ class Train:
                 else:
                     state = next_state
             # self.state_rms.update(next_state)
+            if self.has_latent_code:
+                next_state = np.concatenate([next_state, self.env.latent_code])
             next_state = np.clip((next_state - self.state_rms.mean) / (self.state_rms.var ** 0.5 + 1e-8), -5, 5)
             next_value = self.agent.get_value(next_state) * (1 - done)
             values.append(next_value)
@@ -143,8 +151,8 @@ class Train:
         else:
             self.running_reward = self.running_reward * 0.99 + eval_rewards * 0.01
 
-        if iteration % 100 == 0:
-            print(f"Iter:{iteration}| "
+        if iteration % 1 == 0:
+            print(#f"Iter:{iteration}| "
                   f"Ep_Reward:{eval_rewards:.3f}| "
                   f"Running_reward:{self.running_reward:.3f}| "
                   f"Actor_Loss:{actor_loss:.3f}| "

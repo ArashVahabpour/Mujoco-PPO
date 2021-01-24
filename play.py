@@ -7,9 +7,10 @@ GlfwContext(offscreen=True)
 
 
 class Play:
-    def __init__(self, env, agent, env_name, max_episode=1):
+    def __init__(self, env, agent, env_name, max_episode=1, max_episode_steps=None):
         self.env = env
         self.max_episode = max_episode
+        self.max_episode_steps = max_episode_steps if max_episode_steps is not None else env._max_episode_steps
         self.agent = agent
         _, self.state_rms_mean, self.state_rms_var = self.agent.load_weights()
         self.agent.set_to_eval_mode()
@@ -22,7 +23,10 @@ class Play:
         for _ in range(self.max_episode):
             s = self.env.reset()
             episode_reward = 0
-            for _ in range(self.env._max_episode_steps):
+            for step in range(self.max_episode_steps):
+                if self.agent.has_latent_code:
+                    s = np.concatenate([s, self.env.latent_code])
+                print(f'Step {step}')
                 s = np.clip((s - self.state_rms_mean) / (self.state_rms_var ** 0.5 + 1e-8), -5.0, 5.0)
                 dist = self.agent.choose_dist(s)
                 action = dist.sample().cpu().numpy()[0]

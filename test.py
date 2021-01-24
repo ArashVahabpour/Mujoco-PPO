@@ -6,6 +6,8 @@ def evaluate_model(agent, env, state_rms, action_bounds):
     s = env.reset()
     done = False
     while not done:
+        if agent.has_latent_code:
+            s = np.concatenate([s, env.latent_code])
         s = np.clip((s - state_rms.mean) / (state_rms.var ** 0.5 + 1e-8), -5.0, 5.0)
         dist = agent.choose_dist(s)
         action = dist.sample().cpu().numpy()[0]

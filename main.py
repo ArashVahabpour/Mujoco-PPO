@@ -1,19 +1,25 @@
 import gym
 import os
 import mujoco_py
+import custom_env
 from agent import Agent
 from train import Train
 from play import Play
 
-ENV_NAME = "Swimmer"
-TRAIN_FLAG = False
+# ENV_NAME = "Walker2d"
+# ENV_NAME = "HalfCheetah"
+ENV_NAME = "CustomWalker2d"
+TRAIN_FLAG = True
+# TRAIN_FLAG = False
+
 test_env = gym.make(ENV_NAME + "-v2")
 
 n_states = test_env.observation_space.shape[0]
 action_bounds = [test_env.action_space.low[0], test_env.action_space.high[0]]
 n_actions = test_env.action_space.shape[0]
+n_latent = test_env.n_latent if "Custom" in ENV_NAME else 0
 
-n_iterations = 500
+n_iterations = 5000
 lr = 3e-4
 epochs = 10
 clip_range = 0.2
@@ -36,7 +42,8 @@ if __name__ == "__main__":
                   env_name=ENV_NAME,
                   action_bounds=action_bounds,
                   n_actions=n_actions,
-                  lr=lr)
+                  lr=lr,
+                  n_latent=n_latent)
     if TRAIN_FLAG:
         trainer = Train(env=env,
                         test_env=test_env,
@@ -49,5 +56,5 @@ if __name__ == "__main__":
                         epsilon=clip_range)
         trainer.step()
 
-    player = Play(env, agent, ENV_NAME)
+    player = Play(env, agent, ENV_NAME, max_episode_steps=1000)
     player.evaluate()
