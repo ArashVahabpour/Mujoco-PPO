@@ -69,7 +69,7 @@ class Train:
     def step(self):
         state = self.env.reset()
         for iteration in range(1, 1 + self.n_iterations):
-            print(f'{iteration}/{self.n_iterations}')
+            print(f'Iter: {iteration}/{self.n_iterations}')
             states = []
             actions = []
             rewards = []
@@ -152,12 +152,12 @@ class Train:
             self.running_reward = self.running_reward * 0.99 + eval_rewards * 0.01
 
         print(#f"Iter:{iteration}| "
-              f"Ep_Reward:{eval_rewards:.3f}| "
-              f"Running_reward:{self.running_reward:.3f}| "
-              f"Actor_Loss:{actor_loss:.3f}| "
-              f"Critic_Loss:{critic_loss:.3f}| "
-              f"Iter_duration:{time.time() - self.start_time:.3f}| "
-              f"lr:{self.agent.actor_scheduler.get_last_lr()}")
+              f"Ep_Reward: {eval_rewards:.3f} | "
+              f"Running_reward: {self.running_reward:.3f} | "
+              f"Actor_Loss: {actor_loss:.3f} | "
+              f"Critic_Loss: {critic_loss:.3f} | "
+              f"Iter_duration: {time.time() - self.start_time:.3f} | "
+              f"lr:{self.agent.actor_scheduler.get_last_lr()[0]:.6f}\n")
         if iteration % 100 == 0:
             self.agent.save_weights(iteration, self.state_rms)
 
