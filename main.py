@@ -8,18 +8,22 @@ from play import Play
 
 # ENV_NAME = "Walker2d"
 # ENV_NAME = "HalfCheetah"
-ENV_NAME = "CustomWalker2d"
+# ENV_NAME = "CustomWalker2d"
+ENV_NAME = "CustomAnt"
 # TRAIN_FLAG = True
 TRAIN_FLAG = False
 
+experiment_name = 'ant_curvature_0.05'
+
 test_env = gym.make(ENV_NAME + "-v2")
+
 
 n_states = test_env.observation_space.shape[0]
 action_bounds = [test_env.action_space.low[0], test_env.action_space.high[0]]
 n_actions = test_env.action_space.shape[0]
 n_latent = test_env.n_latent if "Custom" in ENV_NAME else 0
 
-n_iterations = 5000
+n_iterations = 20000
 lr = 3e-4
 epochs = 10
 clip_range = 0.2
@@ -43,7 +47,8 @@ if __name__ == "__main__":
                   action_bounds=action_bounds,
                   n_actions=n_actions,
                   lr=lr,
-                  n_latent=n_latent)
+                  n_latent=n_latent,
+                  experiment_name=experiment_name)
     if TRAIN_FLAG:
         trainer = Train(env=env,
                         test_env=test_env,

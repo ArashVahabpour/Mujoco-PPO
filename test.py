@@ -4,8 +4,8 @@ import numpy as np
 def evaluate_model(agent, env, state_rms, action_bounds):
     total_rewards = 0
     s = env.reset()
-    done = False
-    while not done:
+    max_steps = 1000
+    for _ in range(max_steps):
         if agent.has_latent_code:
             s = np.concatenate([s, env.latent_code])
         s = np.clip((s - state_rms.mean) / (state_rms.var ** 0.5 + 1e-8), -5.0, 5.0)
@@ -16,5 +16,7 @@ def evaluate_model(agent, env, state_rms, action_bounds):
         # env.render()
         s = next_state
         total_rewards += reward
+        if done:
+            break
     # env.close()
     return total_rewards

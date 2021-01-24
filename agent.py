@@ -4,10 +4,11 @@ from torch import from_numpy
 import numpy as np
 import torch
 from torch.optim.lr_scheduler import LambdaLR
+import os
 
 
 class Agent:
-    def __init__(self, env_name, n_iter, n_states, action_bounds, n_actions, lr, n_latent):
+    def __init__(self, env_name, n_iter, n_states, action_bounds, n_actions, lr, n_latent, experiment_name):
         self.env_name = env_name
         self.n_iter = n_iter
         self.action_bounds = action_bounds
@@ -32,6 +33,8 @@ class Agent:
 
         self.actor_scheduler = LambdaLR(self.actor_optimizer, lr_lambda=self.scheduler)
         self.critic_scheduler = LambdaLR(self.actor_optimizer, lr_lambda=self.scheduler)
+
+        self.experiment_name = experiment_name
 
     def choose_dist(self, state):
         state = np.expand_dims(state, 0)
@@ -71,16 +74,20 @@ class Agent:
         self.critic_scheduler.step()
 
     def save_weights(self, iteration, state_rms):
-        torch.save({"current_policy_state_dict": self.current_policy.state_dict(),
-                    "critic_state_dict": self.critic.state_dict(),
-                    "actor_optimizer_state_dict": self.actor_optimizer.state_dict(),
-                    "critic_optimizer_state_dict": self.critic_optimizer.state_dict(),
-                    "actor_scheduler_state_dict": self.actor_scheduler.state_dict(),
-                    "critic_scheduler_state_dict": self.critic_scheduler.state_dict(),
-                    "iteration": iteration,
-                    "state_rms_mean": state_rms.mean,
-                    "state_rms_var": state_rms.var,
-                    "state_rms_count": state_rms.count}, self.env_name + "_weights.pth")
+        weights_dir = os.path.join('weights', self.experiment_name)
+        os.makedirs(weights_dir, exist_ok=True)
+        for i in [iteration, '']:
+            torch.save({"current_policy_state_dict": self.current_policy.state_dict(),
+                        "critic_state_dict": self.critic.state_dict(),
+                        "actor_optimizer_state_dict": self.actor_optimizer.state_dict(),
+                        "critic_optimizer_state_dict": self.critic_optimizer.state_dict(),
+                        "actor_scheduler_state_dict": self.actor_scheduler.state_dict(),
+                        "critic_scheduler_state_dict": self.critic_scheduler.state_dict(),
+                        "iteration": iteration,
+                        "state_rms_mean": state_rms.mean,
+                        "state_rms_var": state_rms.var,
+                        "state_rms_count": state_rms.count},
+                       os.path.join(weights_dir, self.env_name + f"_weights{i}.pth"))
 
     def load_weights(self):
         checkpoint = torch.load(self.env_name + "_weights.pth")
