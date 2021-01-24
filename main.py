@@ -9,8 +9,8 @@ from play import Play
 # ENV_NAME = "Walker2d"
 # ENV_NAME = "HalfCheetah"
 ENV_NAME = "CustomWalker2d"
-TRAIN_FLAG = True
-# TRAIN_FLAG = False
+# TRAIN_FLAG = True
+TRAIN_FLAG = False
 
 test_env = gym.make(ENV_NAME + "-v2")
 

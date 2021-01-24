@@ -26,7 +26,7 @@ class Play:
             for step in range(self.max_episode_steps):
                 if self.agent.has_latent_code:
                     s = np.concatenate([s, self.env.latent_code])
-                print(f'Step {step}')
+                print(f'Step: {step} / Latent Code: {self.env.latent_code.squeeze()}')
                 s = np.clip((s - self.state_rms_mean) / (self.state_rms_var ** 0.5 + 1e-8), -5.0, 5.0)
                 dist = self.agent.choose_dist(s)
                 action = dist.sample().cpu().numpy()[0]
